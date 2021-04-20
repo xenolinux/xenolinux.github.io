@@ -1,0 +1,1555 @@
+<h1>QUICKSTART FOR INSTALLING AN OWNCLOUD SERVER AND CONNECTING TO IT AS A CLIENT</h1>
+
+<h2>OWNCLOUD 10.7</h2>
+
+<p>Owncloud is an open-source file sync, share and content collaboration software that lets teams work on data easily from anywhere, on any device. It provides access to your data through a web interface while providing a platform to view, sync and share across devices easily. </p>
+
+<h3>How to install and configure</h3>
+
+<h4>ABSTRACT</h4>
+
+<p>Read this page for instructions on installing and configuring an Owncloud server as an administrator.</p>
+
+<h2>## Chapter 1. Installing and Using Owncloud Server</h2>
+
+<p>Before installing Owncloud, review the following supported system requirements. </p>
+
+<h3>1.1  Prerequisites</h3>
+
+<ul>
+<li>Verify if the following options meet the minimum requirement for Owncloud.</li>
+</ul>
+
+<h3>System requirements checklist for installing Owncloud</h3>
+
+<p>| Requirements     | Options                                                    |
+| -------------    |:-------------------------------------------------------:   |
+| Operating System | Ubuntu 16.04 and 18.04                                             |
+|                  | Debian 7, 8, and 9                                         |
+|                  | SUSE Linux Enterprise Server 12 with SP1, SP2, and SP3     |
+|                  | Red Hat Enterprise Linux 6.9, 7.3, 7.4, and 7.5                |
+|                  | Fedora 27, 28, and 29                                              |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+| Database         |  MySQL or MariaDB 5.5+                                     |
+|                  | Oracle 11g                                                     | 
+|                  | PostgreSQL 9                                               |
+|                  |SQLite                                                                  |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+|                  | Web server                                                           |
+|              | Apache 2.4 with <a href="https://doc.owncloud.com/server/10.0/admin_manual/installation/manual_installation.html#multi-processing-module-mpm">prefork and mod_php</a>                          |
+| PHP Runtime      | 5.6, 7.0, 7.1, and 7.2                                             |
+| Mobile           | iOS 9.0+                                                   |
+|                  | Android 4.0+                                               |
+| Web Browser      | Edge (current version on Windows 10)                       | <br>
+|                  | IE11+ (except Compatibility Mode)                          |
+|                  | Firefox 57+ or 52 ESR                                      |
+|                  | Chrome 66+                                                 |
+|                  | Safari 10+                                                           |
+| Desktop          | Windows 7+                                                 | 
+|                  | Mac OS X 10.7+ (64-bit only)                               |
+|                  | CentOS 6 &amp; 7 (64-bit only)                                 |
+|                  | Debian 8.0 &amp; 9.0                                                     |
+|                  | Fedora 27 &amp; 28                                                         |
+|                  | Ubuntu 16.04 &amp; 18.04                                                 | <br>
+|                  | openSUSE Leap 42.2 &amp; 42.3                                          |
+| Hypervisors      | Hyper-V                                                            |
+|                  | VMware ESX                                                         |
+|                  | Xen                                                                  |
+|                  | KVM                                                                      |
+| Client Versions  | Desktop Client 2.3.3                                               |
+|                  | iOS App                                                                  |
+|                  | Android App                                                            |</p>
+
+<h3>Memory Requirements</h3>
+
+<p>Memory requirements for running an Owncloud server are greatly variable, depending on the numbers of users and files, and volume of server activity. Owncloud officially requires a minimum of 128MB RAM. But, it is recommended minimum of 512MB RAM. </p>
+
+<h3>Database Requirements</h3>
+
+<p>The following are currently required if you’re running Owncloud together with a MySQL or MariaDB database:</p>
+
+<ul>
+<li><p>Disabled or <code>BINLOG_FORMAT = MIXED or BINLOG_FORMAT = ROW</code> configured Binary Logging, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-with-binary-logging-enabled">MySQL / MariaDB with Binary Logging Enabled</a></p></li>
+<li><p>InnoDB storage engine, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-storage-engine">MySQL / MariaDB storage engine</a></p></li>
+<li><p><code>READ COMMITED</code> transaction isolation level, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-read-commited-transaction-isolation-level">MySQL / MariaDB READ COMMITED transaction isolation level</a></p></li>
+</ul>
+
+<h2>## Chapter 2. Installing and Configuring Owncloud using Docker</h2>
+
+<p>This chapter describes how to install and configure Owncloud server using Docker Compose. </p>
+
+<p>The process consists of configuring the environment, creating the containers, stopping the containers, connecting users to the Owncloud server using the server's IP address and port 8080 and logging in to the Owncloud server.</p>
+
+<h3>2.1 Prerequisites</h3>
+
+<ul>
+<li>Host machine must be able to connect to the Internet.</li>
+<li>Ensure the default port for HTTP, 8080, is accessible. </li>
+<li>Docker is installed and Docker daemon is running.</li>
+</ul>
+
+<h3>2.2 Install and Configure the OwnCloud Server</h3>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Verify Docker is installed.</li>
+</ol>
+
+<p><code>
+$ sudo docker info
+</code>
+Example:</p>
+
+<p>```
+Client:
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  app: Docker App (Docker Inc., v0.9.1-beta3)
+  buildx: Build with BuildKit (Docker Inc., v0.5.1-docker)
+  scan: Docker Scan (Docker Inc., v0.6.0)</p>
+
+<p>Server:
+ Containers: 4
+  Running: 4
+  Paused: 0
+  Stopped: 0
+ Images: 21
+ Server Version: 20.10.5
+ Storage Driver: overlay2
+<code>``
+If you get the output, skip the next step. If you see</code>docker: command not found`, continue to the next step <em>Install Docker</em>.</p>
+
+<ol>
+<li><p><a href="https://docs.docker.com/engine/install/">Install</a> Docker.</p></li>
+<li><p>Create a new project directory.</p></li>
+</ol>
+
+<p><code>
+$ sudo mkdir owncloud-docker-server
+</code></p>
+
+<ol>
+<li>Change the current directory.
+<code>
+$ cd owncloud-docker-server
+</code>
+<h4>NOTE</h4></li>
+</ol>
+
+<blockquote>
+  <p>Go to the directory where your .yaml and .env files are located to be able to run <code>docker-compose</code> commands.</p>
+</blockquote>
+
+<ol>
+<li><p>Copy docker-compose.yml from the GitHub repository.
+<code>
+wget https://raw.githubusercontent.com/owncloud/docs/master/modules/admin_manual/examples/installation/docker/docker-compose.yml
+</code></p></li>
+<li><p>Create the environment configuration file. The configuration exposes port 8080, to allow HTTP connections. It uses separate MariaDB and Redis containers and mounts the data and MySQL data directories on the host for persistent storage.
+<code>
+$ cat &lt;&lt; EOF &gt; .env
+OWNCLOUD_VERSION=10.7
+OWNCLOUD_DOMAIN=localhost:8080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
+HTTP_PORT=8080
+EOF
+</code></p>
+
+<h4>NOTE</h4></li>
+</ol>
+
+<blockquote>
+  <p><code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> do not change between deploys even if the values in the .env file are changed. Do <code>docker volume prune</code> to change those values. Which deletesall your data. </p>
+</blockquote>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p>The following instructions assume you install locally. For remote access, the value of <code>OWNCLOUD_DOMAIN</code> must be adapted.</p>
+</blockquote>
+
+<ol>
+<li>Build and start the container
+<code>
+$ sudo docker-compose up -d
+</code>
+Example:</li>
+</ol>
+
+<p><code>``
+$ docker-compose up -d <br>
+Docker Compose is now in the Docker CLI, try</code>docker compose up`</p>
+
+<p>Creating owncloud<em>mariadb ... done
+Creating owncloud</em>redis   ... done
+Creating owncloud_server  ... done
+```
+8. Check that all the containers have successfully started.</p>
+
+<p>Example:</p>
+
+<p>```
+docker-compose ps   </p>
+
+<h2>      Name                    Command                  State               Ports         </h2>
+
+<p>owncloud<em>mariadb   docker-entrypoint.sh --max ...   Up (healthy)   3306/tcp <br>
+owncloud</em>redis     docker-entrypoint.sh --dat ...   Up (healthy)   6379/tcp <br>
+owncloud_server    /usr/bin/entrypoint /usr/b ...   Up (healthy)   0.0.0.0:8080->8080/tcp
+``` </p>
+
+<h3>2.3 Log in to Owncloud.</h3>
+
+<p>You can view the Owncloud user interface by logging into Owncloud.</p>
+
+<h4>Prerequisites</h4>
+
+<ul>
+<li>The Owncloud is installed and configured.</li>
+<li>A running browser to run the URL.</li>
+</ul>
+
+<h4>Procedure</h4>
+
+<ol>
+<li>Open the URL <code>http://localhost:8080</code> in a web browser. 
+<img src="login.png" alt="Figure 2.3.1" title=""></li>
+<li>Enter the user name admin and its password.
+<img src="login-with-admin.png" alt="Figure 2.3.2" title=""></li>
+<li>Click Log In.
+<img src="login-arrow.png" alt="Figure 2.3.3" title=""></li>
+</ol>
+
+<h2>2.4 Stop the Containers.</h2>
+
+<ol>
+<li>You can stop the containers using <code>docker-compose</code> command. Run the command below.
+<code>
+$ sudo docker-compose stop
+</code>
+Example: 
+<code>
+$ sudo docker-compose stop <br>
+Stopping owncloud_server  ... done
+Stopping owncloud_mariadb ... done
+Stopping owncloud_redis   ... done
+</code></li>
+<li>Stop and remove containers, along with the related networks, images, and volumes. Run the command below.
+<code>
+$ sudo docker-compose down --rmi all --volumes
+</code></li>
+</ol>
+
+<p>Example:</p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+Removing owncloud_server  ... done
+Removing owncloud_mariadb ... done
+Removing owncloud_redis   ... done
+Removing network owncloud-docker-server_default
+Removing volume owncloud-docker-server_files
+Removing volume owncloud-docker-server_mysql
+Removing volume owncloud-docker-server_redis
+Removing image mariadb:10.5
+Removing image redis:6
+Removing image owncloud/server:10.7
+</code>
+3. Verify that containers are removed.</p>
+
+<p><code>
+$ sudo docker-compose ps
+</code></p>
+
+<p>Example:</p>
+
+<p>```
+$ sudo docker-compose ps</p>
+
+<h2>Name   Command   State   Ports</h2>
+
+<p>```</p>
+
+<h2>## Chapter 3. Installing and Configuring Owncloud Server using Linux Package Manager</h2>
+
+<p>This chapter consists of instructions on how to install LAMP, download and install Owncloud source packages, setup MariaDB and configure Owncloud.</p>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Install LAMP ( Linux, Apache, MariaDB and PHP ) server. </li>
+<li>Update the Package Manager for pacakge installation, see <a href="https://download.owncloud.org/download/repositories/production/owncloud/">Package manager</a> </li>
+<li>Download and install OwnCloud, see <a href="https://owncloud.com/download-server/">Download</a></li>
+<li><a href="https://doc.owncloud.com/server/admin_manual/configuration/database/linux_database_configuration.html">Setup</a> MariaDB for OwnCloud.</li>
+<li>Log in to Owncloud server, see Chapter 2.</li>
+</ol>
+
+<h2>## Chapter 4. Adding a User Account as an Administrator</h2>
+
+<p>This chapter describes how to add a user account in Owncloud user interface.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud user interface is accessible.</li>
+<li>Being logged into the Owncloud user interface as an administrator.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Log in to the Owncloud user interface. 
+<img src="login.png" alt="Figure 4.1" title=""></li>
+<li>In the top right corner, click <code>admin</code>. Click <code>Users</code> from the dropdown list.
+<img src="click-admin.png" alt="Figure 4.2" title=""></li>
+<li>Enter the username and email. 
+<img src="enter-username-email.png" alt="Figure 4.3" title=""></li>
+<li>Click the <code>Create</code> button.
+<img src="create-button.png" alt="Figure 4.4" title=""></li>
+</ol>
+
+<h2>## Chapter 5. Installing and Connecting to Owncloud Server Using a Desktop Client.</h2>
+
+<p>This chapter describes steps to install and connect to Owncloud server using desktop client as a user.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Desktop Application must be downloaded. For details, see <a href="https://owncloud.com/desktop-app/">Download desktop app</a></li>
+<li>You have the URL of Owncloud server.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Open the desktop application in your system. The installation wizard takes you step-by-step through configuration options and account setup.</li>
+<li>Click the <code>Continue</code>.
+<img src="continue.png" alt="Figure 5.2" title=""></li>
+<li>Click the <code>Install</code> button.
+<img src="install.png" alt="Figure 5.1" title=""></li>
+<li>Enter the URL for Owncloud server.</li>
+<li>Click the <code>Next</code> button.
+<img src="next.png" alt="Figure 5.3" title=""></li>
+<li>Once installation process is completed, enter the <code>Username</code> and <code>Password</code>.
+<img src="doneinstall.png" alt="Figure 5.4" title=""></li>
+<li>You can sync all of your files on the Owncloud server, or select individual folders on the "Local Folder Option" screen. The default local sync folder is ownCloud, in your home directory. You can change the location of local sync folder.
+<img src="connect.png" alt="Figure 5.5" title=""></li>
+<li>Click on the <code>Connect</code> button. You will see that Owncloud is synchronizing files with local folder.
+<img src="done.png" alt="Figure 5.6" title=""></li>
+</ol>
+<h1>QUICKSTART FOR INSTALLING AN OWNCLOUD SERVER AND CONNECTING TO IT AS A CLIENT</h1>
+
+<h2>OWNCLOUD 10.7</h2>
+
+<p>Owncloud is an open-source file sync, share and content collaboration software that lets teams work on data easily from anywhere, on any device. It provides access to your data through a web interface while providing a platform to view, sync and share across devices easily. </p>
+
+<h3>How to install and configure</h3>
+
+<h4>ABSTRACT</h4>
+
+<p>Read this page for instructions on installing and configuring an Owncloud server as an administrator.
+<br></br></p>
+
+<h2>## Chapter 1. Installing and Using Owncloud Server</h2>
+
+<p>Before installing Owncloud, review the following supported system requirements. </p>
+
+<h3>1.1  Prerequisites</h3>
+
+<ul>
+<li>Verify if the following options meet the minimum requirement for Owncloud.</li>
+</ul>
+
+<h3>System requirements checklist for installing Owncloud</h3>
+
+<p>| Requirements     | Options                                                    |
+| -------------    |:-------------------------------------------------------:   |
+| Operating System | Ubuntu 16.04 and 18.04                                             |
+|                  | Debian 7, 8, and 9                                         |
+|                  | SUSE Linux Enterprise Server 12 with SP1, SP2, and SP3     |
+|                  | Red Hat Enterprise Linux 6.9, 7.3, 7.4, and 7.5                |
+|                  | Fedora 27, 28, and 29                                              |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+| Database         |  MySQL or MariaDB 5.5+                                     |
+|                  | Oracle 11g                                                     | 
+|                  | PostgreSQL 9                                               |
+|                  |SQLite                                                                  |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+|                  | Web server                                                           |
+|              | Apache 2.4 with <a href="https://doc.owncloud.com/server/10.0/admin_manual/installation/manual_installation.html#multi-processing-module-mpm">prefork and mod_php</a>                          |
+| PHP Runtime      | 5.6, 7.0, 7.1, and 7.2                                             |
+| Mobile           | iOS 9.0+                                                   |
+|                  | Android 4.0+                                               |
+| Web Browser      | Edge (current version on Windows 10)                       | <br>
+|                  | IE11+ (except Compatibility Mode)                          |
+|                  | Firefox 57+ or 52 ESR                                      |
+|                  | Chrome 66+                                                 |
+|                  | Safari 10+                                                           |
+| Desktop          | Windows 7+                                                 | 
+|                  | Mac OS X 10.7+ (64-bit only)                               |
+|                  | CentOS 6 &amp; 7 (64-bit only)                                 |
+|                  | Debian 8.0 &amp; 9.0                                                     |
+|                  | Fedora 27 &amp; 28                                                         |
+|                  | Ubuntu 16.04 &amp; 18.04                                                 | <br>
+|                  | openSUSE Leap 42.2 &amp; 42.3                                          |
+| Hypervisors      | Hyper-V                                                            |
+|                  | VMware ESX                                                         |
+|                  | Xen                                                                  |
+|                  | KVM                                                                      |
+| Client Versions  | Desktop Client 2.3.3                                               |
+|                  | iOS App                                                                  |
+|                  | Android App                                                            |</p>
+
+<h3>Memory Requirements</h3>
+
+<p>Memory requirements for running an Owncloud server are greatly variable, depending on the numbers of users and files, and volume of server activity. Owncloud officially requires a minimum of 128MB RAM. But, it is recommended minimum of 512MB RAM. </p>
+
+<h3>Database Requirements</h3>
+
+<p>The following are currently required if you’re running Owncloud together with a MySQL or MariaDB database:</p>
+
+<ul>
+<li><p>Disabled or <code>BINLOG_FORMAT = MIXED or BINLOG_FORMAT = ROW</code> configured Binary Logging, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-with-binary-logging-enabled">MySQL / MariaDB with Binary Logging Enabled</a></p></li>
+<li><p>InnoDB storage engine, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-storage-engine">MySQL / MariaDB storage engine</a></p></li>
+<li><p><code>READ COMMITED</code> transaction isolation level, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-read-commited-transaction-isolation-level">MySQL / MariaDB READ COMMITED transaction isolation level</a>
+<br></br>
+<br></br></p></li>
+</ul>
+
+<h2>## Chapter 2. Installing and Configuring Owncloud using Docker</h2>
+
+<p>This chapter describes how to install and configure Owncloud server using Docker Compose. </p>
+
+<p>The process consists of configuring the environment, creating the containers, stopping the containers, connecting users to the Owncloud server using the server's IP address and port 8080 and logging in to the Owncloud server.</p>
+
+<h3>2.1 Prerequisites</h3>
+
+<ul>
+<li>Host machine must be able to connect to the Internet.</li>
+<li>Ensure the default port for HTTP, 8080, is accessible. </li>
+<li>Docker is installed and Docker daemon is running.</li>
+</ul>
+
+<h3>2.2 Install and Configure the OwnCloud Server</h3>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Verify Docker is installed.</li>
+</ol>
+
+<p><code>
+$ sudo docker info
+</code>
+Example:</p>
+
+<p>```
+Client:
+ Context:    default
+ Debug Mode: false
+ Plugins:
+  app: Docker App (Docker Inc., v0.9.1-beta3)
+  buildx: Build with BuildKit (Docker Inc., v0.5.1-docker)
+  scan: Docker Scan (Docker Inc., v0.6.0)</p>
+
+<p>Server:
+ Containers: 4
+  Running: 4
+  Paused: 0
+  Stopped: 0
+ Images: 21
+ Server Version: 20.10.5
+ Storage Driver: overlay2
+<code>``
+If you get the output, skip the next step. If you see</code>docker: command not found`, continue to the next step <em>Install Docker</em>.</p>
+
+<ol>
+<li><p><a href="https://docs.docker.com/engine/install/">Install</a> Docker.</p></li>
+<li><p>Create a new project directory.</p></li>
+</ol>
+
+<p><code>
+$ sudo mkdir owncloud-docker-server
+</code></p>
+
+<ol>
+<li>Change the current directory.
+<code>
+$ cd owncloud-docker-server
+</code>
+<h4>NOTE</h4></li>
+</ol>
+
+<blockquote>
+  <p>Go to the directory where your .yaml and .env files are located to be able to run <code>docker-compose</code> commands.</p>
+</blockquote>
+
+<ol>
+<li><p>Copy docker-compose.yml from the GitHub repository.
+<code>
+wget https://raw.githubusercontent.com/owncloud/docs/master/modules/admin_manual/examples/installation/docker/docker-compose.yml
+</code></p></li>
+<li><p>Create the environment configuration file. The configuration exposes port 8080, to allow HTTP connections. It uses separate MariaDB and Redis containers and mounts the data and MySQL data directories on the host for persistent storage.
+<code>
+$ cat &lt;&lt; EOF &gt; .env
+OWNCLOUD_VERSION=10.7
+OWNCLOUD_DOMAIN=localhost:8080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
+HTTP_PORT=8080
+EOF
+</code></p>
+
+<h4>NOTE</h4></li>
+</ol>
+
+<blockquote>
+  <p><code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> do not change between deploys even if the values in the .env file are changed. Do <code>docker volume prune</code> to change those values. Which deletesall your data. </p>
+</blockquote>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p>The following instructions assume you install locally. For remote access, the value of <code>OWNCLOUD_DOMAIN</code> must be adapted.</p>
+</blockquote>
+
+<ol>
+<li>Build and start the container
+<code>
+$ sudo docker-compose up -d
+</code>
+Example:</li>
+</ol>
+
+<p><code>``
+$ docker-compose up -d <br>
+Docker Compose is now in the Docker CLI, try</code>docker compose up`</p>
+
+<p>Creating owncloud<em>mariadb ... done
+Creating owncloud</em>redis   ... done
+Creating owncloud_server  ... done
+```
+8. Check that all the containers have successfully started.</p>
+
+<p>Example:</p>
+
+<p>```
+docker-compose ps   </p>
+
+<h2>      Name                    Command                  State               Ports         </h2>
+
+<p>owncloud<em>mariadb   docker-entrypoint.sh --max ...   Up (healthy)   3306/tcp <br>
+owncloud</em>redis     docker-entrypoint.sh --dat ...   Up (healthy)   6379/tcp <br>
+owncloud_server    /usr/bin/entrypoint /usr/b ...   Up (healthy)   0.0.0.0:8080->8080/tcp
+``` </p>
+
+<h3>2.3 Log in to Owncloud.</h3>
+
+<p>You can view the Owncloud user interface by logging into Owncloud.</p>
+
+<h4>Prerequisites</h4>
+
+<ul>
+<li>The Owncloud is installed and configured.</li>
+<li>A running browser to run the URL.</li>
+</ul>
+
+<h4>Procedure</h4>
+
+<ol>
+<li>Open the URL <code>http://localhost:8080</code> in a web browser. 
+<img src="login.png" alt="Figure 2.3.1" title=""></li>
+<li>Enter the user name admin and its password.
+<img src="login-with-admin.png" alt="Figure 2.3.2" title=""></li>
+<li>Click Log In.
+<img src="login-arrow.png" alt="Figure 2.3.3" title=""></li>
+</ol>
+
+<h2>2.4 Stop the Containers.</h2>
+
+<ol>
+<li>You can stop the containers using <code>docker-compose</code> command. Run the command below.
+<code>
+$ sudo docker-compose stop
+</code>
+Example: 
+<code>
+$ sudo docker-compose stop <br>
+Stopping owncloud_server  ... done
+Stopping owncloud_mariadb ... done
+Stopping owncloud_redis   ... done
+</code></li>
+<li>Stop and remove containers, along with the related networks, images, and volumes. Run the command below.
+<code>
+$ sudo docker-compose down --rmi all --volumes
+</code></li>
+</ol>
+
+<p>Example:</p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+Removing owncloud_server  ... done
+Removing owncloud_mariadb ... done
+Removing owncloud_redis   ... done
+Removing network owncloud-docker-server_default
+Removing volume owncloud-docker-server_files
+Removing volume owncloud-docker-server_mysql
+Removing volume owncloud-docker-server_redis
+Removing image mariadb:10.5
+Removing image redis:6
+Removing image owncloud/server:10.7
+</code>
+3. Verify that containers are removed.</p>
+
+<p><code>
+$ sudo docker-compose ps
+</code></p>
+
+<p>Example:</p>
+
+<p>```
+$ sudo docker-compose ps</p>
+
+<h2>Name   Command   State   Ports</h2>
+
+<p>```
+<br></br>
+<br></br></p>
+
+<h2>## Chapter 3. Installing and Configuring Owncloud Server using Linux Package Manager</h2>
+
+<p>This chapter consists of instructions on how to install LAMP, download and install Owncloud source packages, setup MariaDB and configure Owncloud.</p>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Install LAMP ( Linux, Apache, MariaDB and PHP ) server. </li>
+<li>Update the Package Manager for pacakge installation, see <a href="https://download.owncloud.org/download/repositories/production/owncloud/">Package manager</a> </li>
+<li>Download and install OwnCloud, see <a href="https://owncloud.com/download-server/">Download</a></li>
+<li><a href="https://doc.owncloud.com/server/admin_manual/configuration/database/linux_database_configuration.html">Setup</a> MariaDB for OwnCloud.</li>
+<li>Log in to Owncloud server, see Chapter 2.
+<br></br>
+<br></br></li>
+</ol>
+
+<h2>## Chapter 4. Adding a User Account as an Administrator</h2>
+
+<p>This chapter describes how to add a user account in Owncloud user interface.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud user interface is accessible.</li>
+<li>Being logged into the Owncloud user interface as an administrator.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<ol>
+<li>Log in to the Owncloud user interface. 
+<br></br></li>
+</ol>
+
+<p><img src="login.png" alt="Figure 4.1" title="">
+<br></br></p>
+
+<ol>
+<li>In the top right corner, click <code>admin</code>. Click <code>Users</code> from the dropdown list.
+<br></br></li>
+</ol>
+
+<p><img src="click-admin.png" alt="Figure 4.2" title="">
+<br></br></p>
+
+<ol>
+<li>Enter the username and email. 
+<br></br></li>
+</ol>
+
+<p><img src="enter-username-email.png" alt="Figure 4.3" title="">
+<br></br></p>
+
+<ol>
+<li>Click the <code>Create</code> button.
+<br></br></li>
+</ol>
+
+<p><img src="create-button.png" alt="Figure 4.4" title="">
+<br></br>
+<br></br></p>
+
+<h2>## Chapter 5. Installing and Connecting to Owncloud Server Using a Desktop Client.</h2>
+
+<p>This chapter describes steps to install and connect to Owncloud server using desktop client as a user.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Desktop Application must be downloaded. For details, see <a href="https://owncloud.com/desktop-app/">Download desktop app</a></li>
+<li>You have the URL of Owncloud server.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<ol>
+<li><p>Open the desktop application in your system. The installation wizard takes you step-by-step through configuration options and account setup.
+<br></br></p></li>
+<li><p>Click the <code>Continue</code>.
+<br></br></p></li>
+</ol>
+
+<p><img src="continue.png" alt="Figure 5.2" title="">
+<br></br></p>
+
+<ol>
+<li>Click the <code>Install</code> button.
+<br></br></li>
+</ol>
+
+<p><img src="install.png" alt="Figure 5.1" title="">
+<br></br></p>
+
+<ol>
+<li><p>Enter the URL for Owncloud server.
+<br></br></p></li>
+<li><p>Click the <code>Next</code> button.
+<br></br></p></li>
+</ol>
+
+<p><img src="next.png" alt="Figure 5.3" title="">
+<br></br></p>
+
+<ol>
+<li>Once installation process is completed, enter the <code>Username</code> and <code>Password</code>.
+<br></br></li>
+</ol>
+
+<p><img src="doneinstall.png" alt="Figure 5.4" title="">
+<br></br></p>
+
+<ol>
+<li>You can sync all of your files on the Owncloud server, or select individual folders on the "Local Folder Option" screen. The default local sync folder is ownCloud, in your home directory. You can change the location of local sync folder.
+<br></br></li>
+</ol>
+
+<p><img src="connect.png" alt="Figure 5.5" title="">
+<br></br></p>
+
+<ol>
+<li>Click on the <code>Connect</code> button. You will see that Owncloud is synchronizing files with local folder.
+<br></br></li>
+</ol>
+
+<p><img src="done.png" alt="Figure 5.6" title=""></p>
+<h1>QUICKSTART FOR INSTALLING  OWNCLOUD SERVER AND CONNECTING TO IT AS A CLIENT</h1>
+
+<h2>OWNCLOUD 10.7</h2>
+
+<p>Owncloud is open-source file sync, share, and content collaboration software that lets teams work on data easily from anywhere, on any device. It provides access to your data through a web interface while providing a platform to view, sync and share across devices easily. </p>
+
+<h3>How to install and configure</h3>
+
+<h4>ABSTRACT</h4>
+
+<p>Read this page for instructions on installing and configuring an Owncloud server as an administrator.
+<br />
+<br /></p>
+
+<h2>Chapter 1. Requirements for Installing Owncloud</h2>
+
+<p>Before installing Owncloud, review the following supported system requirements. </p>
+
+<h3>1.1 Prerequisites</h3>
+
+<ul>
+<li>Verify if the following options meet the minimum requirement for Owncloud.</li>
+</ul>
+
+<h3>1.2 System requirements checklist for installing Owncloud</h3>
+
+<p>| Requirements     | Options                                                    |
+| -------------    |:-------------------------------------------------------:   |
+| Operating System | Ubuntu 16.04 and 18.04                                             |
+|                  | Debian 7, 8, and 9                                         |
+|                  | SUSE Linux Enterprise Server 12 with SP1, SP2, and SP3     |
+|                  | Red Hat Enterprise Linux 6.9, 7.3, 7.4, and 7.5                |
+|                  | Fedora 27, 28, and 29                                              |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+| Database         |  MySQL or MariaDB 5.5+                                     |
+|                  | Oracle 11g                                                     | 
+|                  | PostgreSQL 9                                               |
+|                  |SQLite                                                                  |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+|                  | Web server                                                           |
+|              | Apache 2.4 with <a href="https://doc.owncloud.com/server/10.0/admin_manual/installation/manual_installation.html#multi-processing-module-mpm">prefork and mod_php</a>                          |
+| PHP Runtime      | 5.6, 7.0, 7.1, and 7.2                                             |
+| Mobile           | iOS 9.0+                                                   |
+|                  | Android 4.0+                                               |
+| Web Browser      | Edge (current version on Windows 10)                       | <br>
+|                  | IE11+ (except Compatibility Mode)                          |
+|                  | Firefox 57+ or 52 ESR                                      |
+|                  | Chrome 66+                                                 |
+|                  | Safari 10+                                                           |
+| Desktop          | Windows 7+                                                 | 
+|                  | Mac OS X 10.7+ (64-bit only)                               |
+|                  | CentOS 6 &amp; 7 (64-bit only)                                 |
+|                  | Debian 8.0 &amp; 9.0                                                     |
+|                  | Fedora 27 &amp; 28                                                         |
+|                  | Ubuntu 16.04 &amp; 18.04                                                 | <br>
+|                  | openSUSE Leap 42.2 &amp; 42.3                                          |
+| Hypervisors      | Hyper-V                                                            |
+|                  | VMware ESX                                                         |
+|                  | Xen                                                                  |
+|                  | KVM                                                                      |
+| Client Versions  | Desktop Client 2.3.3                                               |
+|                  | iOS App                                                                  |
+|                  | Android App                                                            |</p>
+
+<h3>Memory Requirements</h3>
+
+<p>Memory requirements for running an Owncloud server are greatly variable, depending on the numbers of users and files, and volume of the server activity. Owncloud officially requires a minimum of 128MB RAM. But, it is recommended a minimum of 512MB RAM. </p>
+
+<h3>Database Requirements</h3>
+
+<p>The following are currently required if you’re running Owncloud together with a MySQL or MariaDB database:</p>
+
+<ul>
+<li><p>Disabled or <code>BINLOG_FORMAT = MIXED or BINLOG_FORMAT = ROW</code> configured Binary Logging, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-with-binary-logging-enabled">MySQL / MariaDB with Binary Logging Enabled</a>.</p></li>
+<li><p>InnoDB storage engine, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-storage-engine">MySQL / MariaDB storage engine</a>.</p></li>
+<li><p><code>READ COMMITED</code> transaction isolation level, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-read-commited-transaction-isolation-level">MySQL / MariaDB READ COMMITED transaction isolation level</a>.
+<br />
+<br /></p></li>
+</ul>
+
+<h2>Chapter 2. Installing and Configuring Owncloud Using Docker</h2>
+
+<p>This chapter describes how to install and configure the Owncloud server using Docker Compose. </p>
+
+<p>The process consists of configuring the environment, creating the containers, stopping the containers, connecting users to the Owncloud server using the server's IP address and port 8080 and logging in to the Owncloud server.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The host machine must be able to connect to the Internet.</li>
+<li>Ensure the default port for HTTP, 8080, is accessible. </li>
+<li>Docker is installed and Docker daemon is running.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Verify that Docker is installed.
+<br /></p>
+
+<p><code>
+$ sudo docker info
+</code>
+Example:</p>
+
+<p>```
+Client:
+Context:    default
+Debug Mode: false
+Plugins:
+ app: Docker App (Docker Inc., v0.9.1-beta3)
+ buildx: Build with BuildKit (Docker Inc., v0.5.1-docker)
+ scan: Docker Scan (Docker Inc., v0.6.0)</p>
+
+<p>Server:
+Containers: 4
+Running: 4
+Paused: 0
+Stopped: 0
+Images: 21
+Server Version: 20.10.5
+Storage Driver: overlay2
+```
+<br /></p>
+
+<p>If you get the output, skip the next step. If you see <code>docker: command not found</code>, continue to the next step <em>Install Docker</em>.</p>
+
+<p><span>2.</span> <a href="https://docs.docker.com/engine/install/">Install</a> Docker.
+<br /></p>
+
+<p><span>3.</span> Create a new project directory.
+<br /></p>
+
+<p><code>
+$ sudo mkdir owncloud-docker-server
+</code></p>
+
+<p><span>4.</span> Change the current directory.
+<br /></p>
+
+<p><code>
+$ cd owncloud-docker-server
+</code></p>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p>Go to the directory where your .yaml and .env files are located to be able to run <code>docker-compose</code> commands.</p>
+</blockquote>
+
+<p><span>5.</span> Copy docker-compose.yml from the GitHub repository.
+<br /></p>
+
+<p><code>
+$ wget https://raw.githubusercontent.com/owncloud/docs/master/modules/admin_manual/examples/installation/docker/docker-compose.yml
+</code></p>
+
+<p><span>6.</span> Create the environment configuration file. The configuration exposes port 8080, to allow HTTP connections. It uses separate MariaDB and Redis containers and mounts the data and MySQL data directories on the host for persistent storage.
+<br /></p>
+
+<p><code>
+$ cat &lt;&lt; EOF &gt; .env
+OWNCLOUD_VERSION=10.7
+OWNCLOUD_DOMAIN=localhost:8080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
+HTTP_PORT=8080
+EOF
+</code></p>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p><code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> do not change between deploys even if the values in the .env file are changed. Do <code>docker volume prune</code> to change those values. Which deletesall your data. </p>
+
+<p>The following instructions assume you install locally. For remote access, the value of <code>OWNCLOUD_DOMAIN</code> must be adapted.</p>
+</blockquote>
+
+<p><span>7.</span> Build and start the container
+<br /></p>
+
+<p><code>
+$ sudo docker-compose up -d
+</code></p>
+
+<p>Example:</p>
+
+<p><code>``
+$ docker-compose up -d <br>
+Docker Compose is now in the Docker CLI, try</code>docker compose up`</p>
+
+<p>Creating owncloud<em>mariadb ... done
+Creating owncloud</em>redis   ... done
+Creating owncloud_server  ... done
+```</p>
+
+<p><span>8.</span> Check that all the containers have successfully started.
+<br /></p>
+
+<p>Example:</p>
+
+<p>```
+docker-compose ps   </p>
+
+<h2>      Name                    Command                  State               Ports         </h2>
+
+<p>owncloud<em>mariadb   docker-entrypoint.sh --max ...   Up (healthy)   3306/tcp <br>
+owncloud</em>redis     docker-entrypoint.sh --dat ...   Up (healthy)   6379/tcp <br>
+owncloud_server    /usr/bin/entrypoint /usr/b ...   Up (healthy)   0.0.0.0:8080->8080/tcp
+``` </p>
+
+<h2>2.1 Stop the Containers</h2>
+
+<p><span>1.</span> You can stop the containers using <code>docker-compose</code> command. Run the command below.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose stop
+</code>
+Example: </p>
+
+<p><code>
+$ sudo docker-compose stop <br>
+Stopping owncloud_server  ... done
+Stopping owncloud_mariadb ... done
+Stopping owncloud_redis   ... done
+</code></p>
+
+<p><span>2.</span> Stop and remove containers, along with the related networks, images, and volumes. Run the command below.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+</code></p>
+
+<p>Example:</p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+Removing owncloud_server  ... done
+Removing owncloud_mariadb ... done
+Removing owncloud_redis   ... done
+Removing network owncloud-docker-server_default
+Removing volume owncloud-docker-server_files
+Removing volume owncloud-docker-server_mysql
+Removing volume owncloud-docker-server_redis
+Removing image mariadb:10.5
+Removing image redis:6
+Removing image owncloud/server:10.7
+</code></p>
+
+<p><span>3.</span> Verify that containers are removed.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose ps
+</code></p>
+
+<p>Example:</p>
+
+<p>```
+$ sudo docker-compose ps</p>
+
+<h2>Name   Command   State   Ports</h2>
+
+<p>```
+<br />
+<br /></p>
+
+<h2>Chapter 3. Installing and Configuring Owncloud Server using Linux Package Manager</h2>
+
+<p>This chapter consists of instructions on how to install LAMP, download and install Owncloud source packages, setup MariaDB and configure Owncloud.</p>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Install LAMP ( Linux, Apache, MariaDB, and PHP ) server. 
+<br />
+<span>2.</span> Update the Package Manager for package installation, see <a href="https://download.owncloud.org/download/repositories/production/owncloud/">Package manager</a>.
+<br />
+<span>3.</span> Download and install OwnCloud, see <a href="https://owncloud.com/download-server/">Download</a>.
+<br />
+<span>4.</span> <a href="https://doc.owncloud.com/server/admin_manual/configuration/database/linux_database_configuration.html">Setup</a> MariaDB for OwnCloud.
+<br />
+<span>5.</span> Log in to the Owncloud server. For more details, see the next chapter <em>Log in to Owncloud</em>.
+<br />
+<br /></p>
+
+<h2>Chapter 4. Log in to Owncloud</h2>
+
+<p>You can view the Owncloud user interface by logging into Owncloud.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud is installed and configured.</li>
+<li>A running browser to run the URL.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Open the URL <code>http://localhost:8080</code> in a web browser. 
+<br /></p>
+
+<p><img src="login.png" alt="Figure 2.3.1" title=""></p>
+
+<p><span>2.</span> Enter the <strong>Username</strong> admin and its <strong>Password</strong>.
+<br /></p>
+
+<p><img src="login-with-admin.png" alt="Figure 2.3.2" title=""></p>
+
+<p><span>3.</span> Click the arrow to log into the Owncloud User Interface.
+<br /></p>
+
+<p><img src="login-arrow.png" alt="Figure 2.3.3" title=""></p>
+
+<h2>Chapter 5. Adding a User Account as an Administrator</h2>
+
+<p>This chapter describes how to add a user account to the Owncloud user interface.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud user interface is accessible.</li>
+<li>Being logged into the Owncloud user interface as an administrator.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Enter the <strong>Username</strong> and <strong>Password</strong> to log into the Owncloud user interface. 
+<br /></p>
+
+<p><img src="login.png" alt="Figure 4.1" title=""></p>
+
+<p><span>2.</span> In the top right corner, click <strong>admin</strong>. Click <strong>Users</strong> from the dropdown list.
+<br /></p>
+
+<p><img src="click-admin.png" alt="Figure 4.2" title=""></p>
+
+<p><span>3.</span> Enter the <strong>username</strong> and <strong>email</strong>. </p>
+
+<p><img src="enter-username-email.png" alt="Figure 4.3" title="">
+<br /></p>
+
+<p><span>4.</span> Click the <strong>Create</strong> button.
+<br /></p>
+
+<p><img src="create-button.png" alt="Figure 4.4" title="">
+<br />
+<br /></p>
+
+<h2>Chapter 6. Installing and Connecting to Owncloud Server Using a Desktop Client.</h2>
+
+<p>This chapter describes steps to install and connect to the Owncloud server using a desktop client as a user.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Desktop Application must be downloaded. For details, see <a href="https://owncloud.com/desktop-app/">Download desktop app</a>.</li>
+<li>You have the URL of the Owncloud server.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Open the desktop application in your system. The installation wizard takes you step-by-step through configuration options and account setup.
+<br /></p>
+
+<p><span>2.</span> Click the <strong>Continue</strong> button.
+<br /></p>
+
+<p><img src="continue.png" alt="Figure 5.2" title="">
+<br /></p>
+
+<p><span>3.</span> Click the <strong>Install</strong> button.
+<br /></p>
+
+<p><img src="install.png" alt="Figure 5.1" title="">
+<br /></p>
+
+<p><span>4.</span> Enter the URL for the Owncloud server in the space in front of the <strong>Server Address</strong>.
+<br /></p>
+
+<p><span>5.</span> Click the <strong>Next</strong> button.
+<br /></p>
+
+<p><img src="next.png" alt="Figure 5.3" title="">
+<br /></p>
+
+<p><span>6.</span> Once the installation process is completed, enter the <strong>Username</strong> and <strong>Password</strong>.
+<br /></p>
+
+<p><img src="doneinstall.png" alt="Figure 5.4" title="">
+<br /></p>
+
+<p><span>7.</span> You can sync all of your files on the Owncloud server or select individual folders on the <strong>Local Folder</strong> option. The default local sync folder is ownCloud, in your home directory. You can change the location of the local sync folder.
+<br /></p>
+
+<p><img src="connect.png" alt="Figure 5.5" title="">
+<br /></p>
+
+<p><span>8.</span> Click on the <strong>Connect</strong> button. You will see that Owncloud is synchronizing files with the local folder.</p>
+
+<p><img src="done.png" alt="Figure 5.6" title=""></p>
+<h1>QUICKSTART FOR INSTALLING  OWNCLOUD SERVER AND CONNECTING TO IT AS A CLIENT</h1>
+
+<h2>OWNCLOUD 10.7</h2>
+
+<p>Owncloud is open-source file sync, share, and content collaboration software that lets teams work on data easily from anywhere, on any device. It provides access to your data through a web interface while providing a platform to view, sync and share across devices easily. </p>
+
+<h3>How to install and configure</h3>
+
+<h4>ABSTRACT</h4>
+
+<p>Read this page for instructions on installing and configuring an Owncloud server as an administrator.
+<br />
+<br /></p>
+
+<h2>Chapter 1. Requirements for Installing Owncloud</h2>
+
+<p>Before installing Owncloud, review the following supported system requirements. </p>
+
+<h3>1.1 Prerequisites</h3>
+
+<ul>
+<li>Verify if the following options meet the minimum requirement for Owncloud.</li>
+</ul>
+
+<h3>1.2 System requirements checklist for installing Owncloud</h3>
+
+<p>| Requirements     | Options                                                    |
+| -------------    |:-------------------------------------------------------:   |
+| Operating System | Ubuntu 16.04 and 18.04                                             |
+|                  | Debian 7, 8, and 9                                         |
+|                  | SUSE Linux Enterprise Server 12 with SP1, SP2, and SP3     |
+|                  | Red Hat Enterprise Linux 6.9, 7.3, 7.4, and 7.5                |
+|                  | Fedora 27, 28, and 29                                              |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+| Database         |  MySQL or MariaDB 5.5+                                     |
+|                  | Oracle 11g                                                     | 
+|                  | PostgreSQL 9                                               |
+|                  |SQLite                                                                  |
+|                  | openSUSE Leap 42.3 and 15                                          | <br>
+|                  | Web server                                                           |
+|              | Apache 2.4 with <a href="https://doc.owncloud.com/server/10.0/admin_manual/installation/manual_installation.html#multi-processing-module-mpm">prefork and mod_php</a>                          |
+| PHP Runtime      | 5.6, 7.0, 7.1, and 7.2                                             |
+| Mobile           | iOS 9.0+                                                   |
+|                  | Android 4.0+                                               |
+| Web Browser      | Edge (current version on Windows 10)                       | <br>
+|                  | IE11+ (except Compatibility Mode)                          |
+|                  | Firefox 57+ or 52 ESR                                      |
+|                  | Chrome 66+                                                 |
+|                  | Safari 10+                                                           |
+| Desktop          | Windows 7+                                                 | 
+|                  | Mac OS X 10.7+ (64-bit only)                               |
+|                  | CentOS 6 &amp; 7 (64-bit only)                                 |
+|                  | Debian 8.0 &amp; 9.0                                                     |
+|                  | Fedora 27 &amp; 28                                                         |
+|                  | Ubuntu 16.04 &amp; 18.04                                                 | <br>
+|                  | openSUSE Leap 42.2 &amp; 42.3                                          |
+| Hypervisors      | Hyper-V                                                            |
+|                  | VMware ESX                                                         |
+|                  | Xen                                                                  |
+|                  | KVM                                                                      |
+| Client Versions  | Desktop Client 2.3.3                                               |
+|                  | iOS App                                                                  |
+|                  | Android App                                                            |</p>
+
+<h3>Memory Requirements</h3>
+
+<p>Memory requirements for running an Owncloud server are greatly variable, depending on the numbers of users and files, and volume of the server activity. Owncloud officially requires a minimum of 128MB RAM. But, it is recommended a minimum of 512MB RAM. </p>
+
+<h3>Database Requirements</h3>
+
+<p>The following are currently required if you’re running Owncloud together with a MySQL or MariaDB database:</p>
+
+<ul>
+<li><p>Disabled or <code>BINLOG_FORMAT = MIXED or BINLOG_FORMAT = ROW</code> configured Binary Logging, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-with-binary-logging-enabled">MySQL / MariaDB with Binary Logging Enabled</a>.</p></li>
+<li><p>InnoDB storage engine, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-storage-engine">MySQL / MariaDB storage engine</a>.</p></li>
+<li><p><code>READ COMMITED</code> transaction isolation level, see <a href="https://doc.owncloud.com/server/10.0/admin_manual/configuration/database/linux_database_configuration.html#mysql-mariadb-read-commited-transaction-isolation-level">MySQL / MariaDB READ COMMITED transaction isolation level</a>.
+<br />
+<br /></p></li>
+</ul>
+
+<h2>Chapter 2. Installing and Configuring Owncloud Using Docker</h2>
+
+<p>This chapter describes how to install and configure the Owncloud server using Docker Compose. </p>
+
+<p>The process consists of configuring the environment, creating the containers, stopping the containers, connecting users to the Owncloud server using the server's IP address and port 8080 and logging in to the Owncloud server.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The host machine must be able to connect to the Internet.</li>
+<li>Ensure the default port for HTTP, 8080, is accessible. </li>
+<li>Docker is installed and Docker daemon is running.</li>
+</ul>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p>If you want to run Docker without root privileges, see <a href="https://docs.docker.com/engine/security/rootless/">Run the Docker daemon as a non-root user (Rootless mode)</a>.</p>
+</blockquote>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Verify that Docker is installed.
+<br /></p>
+
+<p><code>
+$ sudo docker info
+</code>
+Example:</p>
+
+<p>```
+Client:
+Context:    default
+Debug Mode: false
+Plugins:
+ app: Docker App (Docker Inc., v0.9.1-beta3)
+ buildx: Build with BuildKit (Docker Inc., v0.5.1-docker)
+ scan: Docker Scan (Docker Inc., v0.6.0)</p>
+
+<p>Server:
+Containers: 4
+Running: 4
+Paused: 0
+Stopped: 0
+Images: 21
+Server Version: 20.10.5
+Storage Driver: overlay2
+```
+<br /></p>
+
+<p>If you get the output, skip the next step. If you see <code>docker: command not found</code>, continue to the next step <em>Install Docker</em>.</p>
+
+<p><span>2.</span> <a href="https://docs.docker.com/engine/install/">Install</a> Docker.
+<br /></p>
+
+<p><span>3.</span> Create a new project directory.
+<br /></p>
+
+<p><code>
+$ sudo mkdir owncloud-docker-server
+</code></p>
+
+<p><span>4.</span> Change the current directory.
+<br /></p>
+
+<p><code>
+$ cd owncloud-docker-server
+</code></p>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p>Go to the directory where your .yaml and .env files are located to be able to run <code>docker-compose</code> commands.</p>
+</blockquote>
+
+<p><span>5.</span> Copy docker-compose.yml from the GitHub repository.
+<br /></p>
+
+<p><code>
+$ wget https://raw.githubusercontent.com/owncloud/docs/master/modules/admin_manual/examples/installation/docker/docker-compose.yml
+</code></p>
+
+<p><span>6.</span> Create the environment configuration file. The configuration exposes port 8080, to allow HTTP connections. It uses separate MariaDB and Redis containers and mounts the data and MySQL data directories on the host for persistent storage.
+<br /></p>
+
+<p><code>
+$ cat &lt;&lt; EOF &gt; .env
+OWNCLOUD_VERSION=10.7
+OWNCLOUD_DOMAIN=localhost:8080
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=admin
+HTTP_PORT=8080
+EOF
+</code></p>
+
+<h4>NOTE</h4>
+
+<blockquote>
+  <p><code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code> do not change between deploys even if the values in the .env file are changed. Do <code>docker volume prune</code> to change those values. Which deletesall your data. </p>
+
+<p>The following instructions assume you install locally. For remote access, the value of <code>OWNCLOUD_DOMAIN</code> must be adapted.</p>
+</blockquote>
+
+<p><span>7.</span> Build and start the container
+<br /></p>
+
+<p><code>
+$ sudo docker-compose up -d
+</code></p>
+
+<p>Example:</p>
+
+<p><code>``
+$ docker-compose up -d <br>
+Docker Compose is now in the Docker CLI, try</code>docker compose up`</p>
+
+<p>Creating owncloud<em>mariadb ... done
+Creating owncloud</em>redis   ... done
+Creating owncloud_server  ... done
+```</p>
+
+<p><span>8.</span> Check that all the containers have successfully started.
+<br /></p>
+
+<p>Example:</p>
+
+<p>```
+docker-compose ps   </p>
+
+<h2>      Name                    Command                  State               Ports         </h2>
+
+<p>owncloud<em>mariadb   docker-entrypoint.sh --max ...   Up (healthy)   3306/tcp <br>
+owncloud</em>redis     docker-entrypoint.sh --dat ...   Up (healthy)   6379/tcp <br>
+owncloud_server    /usr/bin/entrypoint /usr/b ...   Up (healthy)   0.0.0.0:8080->8080/tcp
+``` </p>
+
+<h2>2.1 Stop the Containers</h2>
+
+<p><span>1.</span> You can stop the containers using <code>docker-compose</code> command. Run the command below.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose stop
+</code>
+Example: </p>
+
+<p><code>
+$ sudo docker-compose stop <br>
+Stopping owncloud_server  ... done
+Stopping owncloud_mariadb ... done
+Stopping owncloud_redis   ... done
+</code></p>
+
+<p><span>2.</span> Stop and remove containers, along with the related networks, images, and volumes. Run the command below.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+</code></p>
+
+<p>Example:</p>
+
+<p><code>
+$ sudo docker-compose down --rmi all --volumes
+Removing owncloud_server  ... done
+Removing owncloud_mariadb ... done
+Removing owncloud_redis   ... done
+Removing network owncloud-docker-server_default
+Removing volume owncloud-docker-server_files
+Removing volume owncloud-docker-server_mysql
+Removing volume owncloud-docker-server_redis
+Removing image mariadb:10.5
+Removing image redis:6
+Removing image owncloud/server:10.7
+</code></p>
+
+<p><span>3.</span> Verify that containers are removed.
+<br /></p>
+
+<p><code>
+$ sudo docker-compose ps
+</code></p>
+
+<p>Example:</p>
+
+<p>```
+$ sudo docker-compose ps</p>
+
+<h2>Name   Command   State   Ports</h2>
+
+<p>```
+<br />
+<br /></p>
+
+<h2>Chapter 3. Installing and Configuring Owncloud Server using Linux Package Manager</h2>
+
+<p>This chapter consists of instructions on how to install LAMP, download and install Owncloud source packages, setup MariaDB and configure Owncloud.</p>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Install LAMP ( Linux, Apache, MariaDB, and PHP ) server. 
+<br />
+<span>2.</span> Update the Package Manager for package installation, see <a href="https://download.owncloud.org/download/repositories/production/owncloud/">Package manager</a>.
+<br />
+<span>3.</span> Download and install OwnCloud, see <a href="https://owncloud.com/download-server/">Download</a>.
+<br />
+<span>4.</span> <a href="https://doc.owncloud.com/server/admin_manual/configuration/database/linux_database_configuration.html">Setup</a> MariaDB for OwnCloud.
+<br />
+<span>5.</span> Log in to the Owncloud server. For more details, see the next chapter <em>Log in to Owncloud</em>.
+<br />
+<br /></p>
+
+<h2>Chapter 4. Log in to Owncloud</h2>
+
+<p>You can view the Owncloud user interface by logging into Owncloud.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud is installed and configured.</li>
+<li>A running browser to run the URL.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Open the URL <code>http://localhost:8080</code> in a web browser. 
+<br /></p>
+
+<p><img src="login.png" alt="Figure 2.3.1" title=""></p>
+
+<p><span>2.</span> Enter the <strong>Username</strong> admin and its <strong>Password</strong>.
+<br /></p>
+
+<p><img src="login-with-admin.png" alt="Figure 2.3.2" title=""></p>
+
+<p><span>3.</span> Click the arrow to log into the Owncloud User Interface.
+<br /></p>
+
+<p><img src="login-arrow.png" alt="Figure 2.3.3" title=""></p>
+
+<h2>Chapter 5. Adding a User Account as an Administrator</h2>
+
+<p>This chapter describes how to add a user account to the Owncloud user interface.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Owncloud user interface is accessible.</li>
+<li>Being logged into the Owncloud user interface as an administrator.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Enter the <strong>Username</strong> and <strong>Password</strong> to log into the Owncloud user interface. 
+<br /></p>
+
+<p><img src="login.png" alt="Figure 4.1" title=""></p>
+
+<p><span>2.</span> In the top right corner, click <strong>admin</strong>. Click <strong>Users</strong> from the dropdown list.
+<br /></p>
+
+<p><img src="click-admin.png" alt="Figure 4.2" title=""></p>
+
+<p><span>3.</span> Enter the <strong>username</strong> and <strong>email</strong>. </p>
+
+<p><img src="enter-username-email.png" alt="Figure 4.3" title="">
+<br /></p>
+
+<p><span>4.</span> Click the <strong>Create</strong> button.
+<br /></p>
+
+<p><img src="create-button.png" alt="Figure 4.4" title="">
+<br />
+<br /></p>
+
+<h2>Chapter 6. Installing and Connecting to Owncloud Server Using a Desktop Client.</h2>
+
+<p>This chapter describes steps to install and connect to the Owncloud server using a desktop client as a user.</p>
+
+<h3>Prerequisites</h3>
+
+<ul>
+<li>The Desktop Application must be downloaded. For details, see <a href="https://owncloud.com/desktop-app/">Download desktop app</a>.</li>
+<li>You have the URL of the Owncloud server.</li>
+</ul>
+
+<h3>Procedure</h3>
+
+<p><span>1.</span> Open the desktop application in your system. The installation wizard takes you step-by-step through configuration options and account setup.
+<br /></p>
+
+<p><span>2.</span> Click the <strong>Continue</strong> button.
+<br /></p>
+
+<p><img src="continue.png" alt="Figure 5.2" title="">
+<br /></p>
+
+<p><span>3.</span> Click the <strong>Install</strong> button.
+<br /></p>
+
+<p><img src="install.png" alt="Figure 5.1" title="">
+<br /></p>
+
+<p><span>4.</span> Enter the URL for the Owncloud server in the space in front of the <strong>Server Address</strong>.
+<br /></p>
+
+<p><span>5.</span> Click the <strong>Next</strong> button.
+<br /></p>
+
+<p><img src="next.png" alt="Figure 5.3" title="">
+<br /></p>
+
+<p><span>6.</span> Once the installation process is completed, enter the <strong>Username</strong> and <strong>Password</strong>.
+<br /></p>
+
+<p><img src="doneinstall.png" alt="Figure 5.4" title="">
+<br /></p>
+
+<p><span>7.</span> You can sync all of your files on the Owncloud server or select individual folders on the <strong>Local Folder</strong> option. The default local sync folder is ownCloud, in your home directory. You can change the location of the local sync folder.
+<br /></p>
+
+<p><img src="connect.png" alt="Figure 5.5" title="">
+<br /></p>
+
+<p><span>8.</span> Click on the <strong>Connect</strong> button. You will see that Owncloud is synchronizing files with the local folder.</p>
+
+<p><img src="done.png" alt="Figure 5.6" title=""></p>
